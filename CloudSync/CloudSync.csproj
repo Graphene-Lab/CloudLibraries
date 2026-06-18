@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Configurations>Debug;Test;DEBUG_AND;Release</Configurations>
     <UserSecretsId>8d0a6e5c-7792-4721-9f23-2b58240b121d</UserSecretsId>
     <Nullable>enable</Nullable>
