@@ -8,6 +8,37 @@ using static EncryptedMessaging.MessageFormat;
 namespace CloudBox
 {
     /// <summary>
+    /// Explains the current application feature state.
+    /// </summary>
+    public enum ApplicationContextReason : byte
+    {
+        /// <summary>
+        /// The application context reason is unknown or missing.
+        /// </summary>
+        Unknown = 0,
+        /// <summary>
+        /// Remote applications are available.
+        /// </summary>
+        Available = 1,
+        /// <summary>
+        /// Remote applications are disabled by server policy.
+        /// </summary>
+        ApplicationsDisabled = 2,
+        /// <summary>
+        /// Remote applications require a Linux server.
+        /// </summary>
+        ServerNotLinux = 3,
+        /// <summary>
+        /// Remote applications require a supported desktop client connection.
+        /// </summary>
+        ClientNotSupported = 4,
+        /// <summary>
+        /// No supported applications are installed on the server.
+        /// </summary>
+        NoSupportedApps = 5
+    }
+
+    /// <summary>
     /// Set of commands that allow you to carry out some operations on the cloud and access special functions
     /// </summary>
     public abstract partial class CloudBox
@@ -55,9 +86,15 @@ namespace CloudBox
             /// </summary>
             GetSSHAccess,
             /// <summary>
-            /// Get supported applications
+            /// Obsolete command for getting only the supported application list.
+            /// Can be removed after old clients no longer need compatibility.
+            /// New code should use GetApplicationContext.
             /// </summary>
-            GetSupportedApps
+            GetSupportedApps,
+            /// <summary>
+            /// Get application feature context and supported applications
+            /// </summary>
+            GetApplicationContext
         }
 
         private static UInt16 AppId => BitConverter.ToUInt16(Encoding.ASCII.GetBytes("cloud"), 0);
