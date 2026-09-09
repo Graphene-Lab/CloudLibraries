@@ -1,8 +1,13 @@
-name: Publish NuGet Package
+name: Publish NuGet Packages
 
 # GENERAL release rule (AgentBridge/Graphene convention): a plain push is a code sync and
 # publishes nothing. Publishing is explicit and versioned: push a tag v* (e.g. v1.26.09.09)
-# and this workflow packs CloudBox.csproj and publishes the package to nuget.org.
+# and this workflow packs and publishes CloudSync first, then CloudBox (CloudBox depends on
+# CloudSync + EncryptedMessaging packages), both at the tag version.
+#
+# NOTE: no -p:PackageId here on purpose. The pack target names the package after the project
+# file (CloudSync, CloudBox); a global PackageId would leak into every ProjectReference in the
+# restore graph and break with "Ambiguous project name".
 on:
   push:
     tags: ['v*']
@@ -18,15 +23,15 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Pack
+      - name: Pack CloudSync
         shell: bash
         env:
           VER: ${{ github.ref_name }}
         run: |
           VER="${VER#v}"
-          dotnet pack CloudBox/CloudBox.csproj -c Release -o ./out \
-            -p:PackageId=CloudBox -p:Version="$VER" -p:SkipNuGetPush=true
-      - name: Push to NuGet
+          dotnet pack CloudSync/CloudSync.csproj -c Release -o ./out \
+            -p:Version="$VER" -p:SkipNuGetPush=true
+      - name: Push CloudSync
         shell: bash
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -35,4 +40,22 @@ jobs:
             echo "::error::NUGET_API_KEY secret is not set on this repository — the package was NOT published."
             exit 1
           fi
-          dotnet nuget push ./out/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push ./out/CloudSync.*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Pack CloudBox
+        shell: bash
+        env:
+          VER: ${{ github.ref_name }}
+        run: |
+          VER="${VER#v}"
+          dotnet pack CloudBox/CloudBox.csproj -c Release -o ./out \
+            -p:Version="$VER" -p:SkipNuGetPush=true
+      - name: Push CloudBox
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::NUGET_API_KEY secret is not set on this repository — the package was NOT published."
+            exit 1
+          fi
+          dotnet nuget push ./out/CloudBox.*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

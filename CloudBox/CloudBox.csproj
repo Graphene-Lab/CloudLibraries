@@ -16,7 +16,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj" />
+	  <!-- Dual-reference pattern: the local sibling project wins in solution builds; the
+	       published NuGet package is restored when the sibling is absent (public CI builds
+	       cannot check out the EncryptedMessaging repo). -->
+	  <ProjectReference Include="..\..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj" Condition="Exists('..\..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj')" />
+	  <PackageReference Include="EncryptedMessaging" Version="1.*" Condition="!Exists('..\..\..\..\EncryptedMessaging\EncryptedMessaging\EncryptedMessaging.csproj')" />
 	  <ProjectReference Include="..\CloudSync\CloudSync.csproj" />
 	</ItemGroup>
 

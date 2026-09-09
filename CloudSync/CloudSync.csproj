@@ -29,7 +29,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\SecureStorage\SecureStorage.csproj" />
+    <!-- Dual-reference pattern: the local sibling project wins in solution builds; the
+         published NuGet package is restored when the sibling is absent (public CI builds
+         cannot check out the SecureStorage repo). -->
+    <ProjectReference Include="..\..\..\..\SecureStorage\SecureStorage.csproj" Condition="Exists('..\..\..\..\SecureStorage\SecureStorage.csproj')" />
+    <PackageReference Include="SecureStorage" Version="1.*" Condition="!Exists('..\..\..\..\SecureStorage\SecureStorage.csproj')" />
   </ItemGroup>
 
   <ItemGroup>
