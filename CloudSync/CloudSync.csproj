@@ -1,5 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Package id "CloudSync" is squatted on nuget.org (unlisted 1.0.0 by a third
+       party), so this library publishes as CloudSyncLibrary. The assembly name stays
+       CloudSync, so all existing `using CloudSync;` code keeps working. -->
+  <PropertyGroup>
+    <PackageId>CloudSyncLibrary</PackageId>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Configurations>Debug;Test;DEBUG_AND;Release</Configurations>

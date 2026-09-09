@@ -31,7 +31,7 @@ jobs:
           VER="${VER#v}"
           dotnet pack CloudSync/CloudSync.csproj -c Release -o ./out \
             -p:Version="$VER" -p:SkipNuGetPush=true
-      - name: Push CloudSync
+      - name: Push CloudSyncLibrary
         shell: bash
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -40,7 +40,7 @@ jobs:
             echo "::error::NUGET_API_KEY secret is not set on this repository — the package was NOT published."
             exit 1
           fi
-          dotnet nuget push ./out/CloudSync.*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push ./out/CloudSyncLibrary.*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Pack CloudBox
         shell: bash
         env:
