@@ -1,0 +1,13 @@
+<Project>
+  <!-- Apply to the final application even when CloudBox is the direct dependency.
+       Util.IcoFullName expects real files under the application's Assets directory. -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\assets\*.ico"
+          Link="Assets\%(Filename)%(Extension)"
+          TargetPath="Assets\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          ExcludeFromSingleFile="true"
+          Pack="false" />
+  </ItemGroup>
+</Project>

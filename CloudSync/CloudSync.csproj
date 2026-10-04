@@ -44,30 +44,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\Cloud.ico">
+    <!-- Folder and shortcut icons must remain accessible beside the running app,
+         including when it consumes CloudSync transitively through a NuGet package. -->
+    <None Update="Assets\*.ico" Pack="true" PackagePath="assets\%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
-    <None Update="Assets\Documents.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Download.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Movies.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Photos.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Pictures.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Settings.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Share.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="buildTransitive\CloudSyncLibrary.targets" Pack="true" PackagePath="buildTransitive\CloudSyncLibrary.targets" />
   </ItemGroup>
 
 </Project>
