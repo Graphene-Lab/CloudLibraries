@@ -127,7 +127,7 @@ namespace CloudSync
                 throw new Exception("Undefined file group!");
             var record = records.FirstOrDefault(x => x.StartsWith("# Guid="));
             if (record == null)
-                throw new Exception("File group without Guid!");
+                throw new MissingShareGroupGuidException(sharingGroup);
             var guid = Guid.Parse(record.Split('=')[1]);
             if (date == null)
                 date = DateTime.UtcNow;
@@ -206,5 +206,13 @@ namespace CloudSync
             proxyUrl += "?qr=" + qr;
             return "The link to access shared files is: " + proxyUrl + Environment.NewLine + "The pin is: " + Context.Share.GetPin(sharingGroup) + Environment.NewLine + "Attention: Provide links and pins separately using different communication systems!";
         }
+    }
+
+    public sealed class MissingShareGroupGuidException : Exception
+    {
+        public string SharingGroup { get; }
+
+        public MissingShareGroupGuidException(string sharingGroup)
+            : base("File group without Guid!") => SharingGroup = sharingGroup;
     }
 }

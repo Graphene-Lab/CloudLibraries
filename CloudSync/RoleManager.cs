@@ -160,7 +160,17 @@ namespace CloudSync
                 {
                     foreach (var g in Context.Share.GetGroups())
                     {
-                        foreach (var p in Context.Share.GetPins(g))
+                        List<string> sharingPins;
+                        try
+                        {
+                            sharingPins = Context.Share.GetPins(g);
+                        }
+                        catch (MissingShareGroupGuidException)
+                        {
+                            continue;
+                        }
+
+                        foreach (var p in sharingPins)
                         {
                             var Proof = CryptographicProofOfPinKnowledge(RandomBitesForAuthenticationProof, p);
                             if (Proof == ProofOfPinKnowledge)
