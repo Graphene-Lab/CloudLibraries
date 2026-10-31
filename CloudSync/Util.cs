@@ -805,7 +805,8 @@ end tell";
         {
             if (context?._HashFileTable == null)
                 return true;
-            if (context.StorageLimitGB != -1 && (int)(context._HashFileTable.UsedSpace / 1000000000) > context.StorageLimitGB) // check over limit quota
+            var storageLimitGB = context.StorageLimitGB;
+            if (storageLimitGB != -1 && context._HashFileTable.UsedSpace >= storageLimitGB * 1000000000L)
                 return false;
             var result = PreserveDriveSpace(context.CloudRoot, false, preserveSize);
             return result;
