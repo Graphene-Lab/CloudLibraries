@@ -154,10 +154,26 @@ namespace CloudBox
         }
 
         private int _StorageLimitGB;
+        private readonly object StorageLimitLock = new();
+
+        /// <summary>
+        /// The total storage allowance in decimal GB, or -1 for unlimited.
+        /// Changes are persisted and applied to the running sync instance immediately.
+        /// </summary>
         public int StorageLimitGB
         {
             get { return Context == null ? 0 : Context.SecureStorage.Values.Get(nameof(StorageLimitGB), -1); }
-            set { Context.SecureStorage.Values.Set(nameof(StorageLimitGB), value); }
+            set
+            {
+                if (value < -1)
+                    throw new ArgumentOutOfRangeException(nameof(value), "The storage limit must be -1 (unlimited) or a non-negative number of GB.");
+
+                lock (StorageLimitLock)
+                {
+                    Context.SecureStorage.Values.Set(nameof(StorageLimitGB), value);
+                    Sync?.SetStorageLimitGB(value);
+                }
+            }
         }
 
         /// <summary>
@@ -399,7 +415,10 @@ namespace CloudBox
         /// <param name="zeroKnowledgeEncryptionMasterKey">If set, zero knowledge proof is enabled, meaning files will be sent encrypted with keys derived from this, and once received, if encrypted, they will be decrypted.</param>
         public void StartSync(LoginCredential credential = null, byte[] zeroKnowledgeEncryptionMasterKey = null)
         {
-            Sync = new Sync(Context.My.Id, SendSyncCommand, out OnSyncCommand, Context.SecureStorage, CloudPath, credential, DoNotCreateSpecialFolders, Owner, zeroKnowledgeEncryptionMasterKey, StorageLimitGB);
+            lock (StorageLimitLock)
+            {
+                Sync = new Sync(Context.My.Id, SendSyncCommand, out OnSyncCommand, Context.SecureStorage, CloudPath, credential, DoNotCreateSpecialFolders, Owner, zeroKnowledgeEncryptionMasterKey, StorageLimitGB);
+            }
             // Sync.OnNotification += (fromUserId, notice) => OnNotificationAction?.Invoke(fromUserId, notice);
             Sync.OnNotification += (fromUserId, notice) => OnNotificationActionList.Concat([OnNotificationAction]).ToList().ForEach(x => x?.Invoke(fromUserId, notice));
             Sync.OnLocalSyncStatusChanges += (syncStatus, pendingFiles) =>

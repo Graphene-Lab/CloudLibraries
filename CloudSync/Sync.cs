@@ -37,7 +37,7 @@ namespace CloudSync
             }
             if (encryptionMasterKey != null)
                 ZeroKnowledgeProof = new ZeroKnowledgeProof(this, encryptionMasterKey);
-            StorageLimitGB = storageLimitGB;
+            SetStorageLimitGB(storageLimitGB);
             SecureStorage = secureStorage;
             RoleManager = new RoleManager(this);
             InstanceId = InstanceCounter;
@@ -99,9 +99,10 @@ namespace CloudSync
         {
             if (GetHashFileTable(out var hashFileTable))
             {
-                if (StorageLimitGB == -1) // - 1 values = unlimited
+                var storageLimitGB = StorageLimitGB;
+                if (storageLimitGB == -1) // - 1 values = unlimited
                     return -1;
-                var free = StorageLimitGB * 1000000000L - hashFileTable.UsedSpace;
+                var free = storageLimitGB * 1000000000L - hashFileTable.UsedSpace;
                 return free < 0 ? 0 : free;
             }
             return 0;
@@ -118,9 +119,24 @@ namespace CloudSync
 
 
         /// <summary>
-        /// The amount of space reserved for file storage expressed in gigabytes
+        /// The storage limit in decimal gigabytes. -1 means unlimited; 0 prevents uploads.
         /// </summary>
-        public int StorageLimitGB { get; private set; }
+        public int StorageLimitGB => Volatile.Read(ref _storageLimitGB);
+
+        private int _storageLimitGB = -1;
+
+        /// <summary>
+        /// Apply a new storage limit to the running sync instance without restarting it.
+        /// The owning cloud is responsible for persisting the limit.
+        /// </summary>
+        /// <param name="storageLimitGB">The new total allowance in decimal GB, or -1 for unlimited.</param>
+        public void SetStorageLimitGB(int storageLimitGB)
+        {
+            if (storageLimitGB < -1)
+                throw new ArgumentOutOfRangeException(nameof(storageLimitGB), "The storage limit must be -1 (unlimited) or a non-negative number of GB.");
+
+            Volatile.Write(ref _storageLimitGB, storageLimitGB);
+        }
 
         public AutoResetEvent OnLoginCompleted;
 
